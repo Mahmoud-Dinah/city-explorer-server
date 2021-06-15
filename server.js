@@ -1,8 +1,11 @@
 require('dotenv').config();
 const express = require('express') // require the express package
 const app = express() // initialize your express app instance
-const data = require ('./data/weather.json')
+const weatherJsonData = require ('./data/weather.json');
+const axios = require('axios');
+const WEATHER_BIT_KEY = process.env.WEATHER_BIT_KEY;
 const cors = require('cors');
+const { response } = require('express');
 
 app.use(cors()) // after you initialize your express app instance
 
@@ -10,9 +13,26 @@ app.use(cors()) // after you initialize your express app instance
 
 const PORT = process.env.PORT;
 
-app.get('/', // our endpoint name
- function (req, res) { // callback function of what we should do with our request
-    res.json(data) // our endpoint function response
-})
+app.get('/weather',(req, res) =>{
+    const lat = req.query.lat;
+    const lon = req.query.lon;
+    if (lat && lon){
+        const weatherBitUrl = `https://api.weatherbit.io/v2.0/forecast/daily?key=${WEATHER_BIT_KEY}&lat=${lat}&lon=${lon}`;
+        axios.get(weatherBitUrl).then(response =>{
+            const responseData =  response.data.data.map(obj => new Weather(obj));
+            res.json(responseData)
+        }).catch(error => {
+            res.send(error.message)
+        });
+    }else {
+        res.send('no lat and lon found!!')
+    }
+ });
 
-app.listen(PORT) // kick start the express server to work
+ class Weather {
+     constructor(weatherJsonData){
+     this.description = weatherJsonData.weather.description;
+     this.date = weatherJsonData.valid_date;
+ }
+}
+app.listen(PORT) // 
