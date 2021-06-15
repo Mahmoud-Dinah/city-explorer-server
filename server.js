@@ -33,6 +33,7 @@ app.get('/weather',(req, res) =>{
      constructor(weatherJsonData){
      this.description = weatherJsonData.weather.description;
      this.date = weatherJsonData.valid_date;
+     console.log(weatherJsonData);
  }
 }
 app.listen(PORT) // 
